@@ -24,16 +24,28 @@ python main.py --model s --demo --track --weights weights/safetensors/deimv2_s.s
 
 Webcam, `q` to quit. `--source video.mp4` for a file, drop `--track` for detection only.
 
-### ONNX / TensorRT
+### Download
 
-All weights are in [Releases](https://github.com/Shohruh72/DEIMv2-Track/releases/tag/v1.0):
+All weights are in [Releases](https://github.com/Shohruh72/DEIMv2-Track/releases/tag/v1.0), click a size to download:
 
-| File                         | Folder                 | Use                                                    |
-|:-----------------------------|:-----------------------|:-------------------------------------------------------|
-| `deimv2_{model}.safetensors` | `weights/safetensors/` | PyTorch, all 8 models                                  |
-| `deimv2_{model}.onnx`        | `weights/onnx/`        | onnxruntime, FP32, CPU or GPU (`atto`, `n`, `s`, `x`)  |
-| `deimv2_{model}_fp16.onnx`   | `weights/onnx/`        | source of a TensorRT FP16 engine for your GPU          |
-| `deimv2_{model}_fp16.engine` | `weights/engine/`      | prebuilt, runs only on RTX 4070 Laptop + TensorRT 11.4 |
+| Version | Input | Params | COCO AP | PyTorch | ONNX FP32 | ONNX FP16 | TensorRT FP16 |
+|:-------:|:-----:|-------:|--------:|--------:|----------:|----------:|--------------:|
+| atto | 320 | 0.5M | 23.7 | [2.1 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_atto.safetensors) | [2.5 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_atto.onnx) | [1.6 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_atto_fp16.onnx) | [4.9 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_atto_fp16.engine) |
+| femto | 416 | 1.0M | 31.0 | [4.0 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_femto.safetensors) | [4.4 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_femto.onnx) | [2.5 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_femto_fp16.onnx) | [6.3 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_femto_fp16.engine) |
+| pico | 640 | 1.5M | 38.5 | [6.3 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_pico.safetensors) | [6.6 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_pico.onnx) | [3.6 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_pico_fp16.onnx) | [8.4 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_pico_fp16.engine) |
+| n | 640 | 3.6M | 43.0 | [14.6 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_n.safetensors) | [14.9 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_n.onnx) | [7.8 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_n_fp16.onnx) | [11.4 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_n_fp16.engine) |
+| s | 640 | 9.8M | 50.9 | [39.4 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_s.safetensors) | [40.2 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_s.onnx) | [20.8 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_s_fp16.onnx) | [29.5 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_s_fp16.engine) |
+| m | 640 | 18.2M | 53.0 | [73.8 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_m.safetensors) | [73.7 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_m.onnx) | [37.6 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_m_fp16.onnx) | [46.8 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_m_fp16.engine) |
+| l | 640 | 32.2M | 56.0 | [130.6 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_l.safetensors) | [130.0 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_l.onnx) | [65.8 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_l_fp16.onnx) | [74.6 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_l_fp16.engine) |
+| x | 640 | 50.4M | 57.8 | [205.3 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_x.safetensors) | [202.7 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_x.onnx) | [102.4 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_x_fp16.onnx) | [108.9 MB](https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_x_fp16.engine) |
+
+* Folders: PyTorch `weights/safetensors/`, ONNX `weights/onnx/`, TensorRT `weights/engine/`
+* ONNX FP32: onnxruntime on CPU or GPU. ONNX FP16: source of a TensorRT engine for your GPU
+* TensorRT FP16: prebuilt on RTX 4070 Laptop + TensorRT 11.4 and runs only there, otherwise build it from ONNX FP16 (below)
+
+### Inference
+
+Examples use `s`, replace it with any version of the table.
 
 ONNX Runtime:
 
