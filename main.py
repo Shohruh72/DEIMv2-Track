@@ -273,6 +273,11 @@ def load_model(args, params):
 
 
 def export(args, params):
+    if args.export == 'engine' and args.weights.endswith('.onnx'):
+        # TensorRT engine straight from a released ONNX (use *_fp16.onnx for an FP16 engine)
+        name = os.path.splitext(os.path.basename(args.weights))[0]
+        util.export_engine(args.weights, args.batch_size, output=f'./weights/engine/{name}.engine')
+        return
     model = load_model(args, params)
     # weights/onnx/{name}.onnx, weights/onnx/{name}_fp16.onnx -> weights/engine/{name}_fp16.engine
     name = os.path.splitext(os.path.basename(args.weights or 'best.pt'))[0]

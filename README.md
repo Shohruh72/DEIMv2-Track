@@ -1,6 +1,7 @@
-[DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2) re-implementation using PyTorch
+[DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2) detection and multi-object tracking using PyTorch
 
 Real-time DETR detector: 8 models from 0.5M to 50M parameters, no NMS, verified against the official COCO results.
+ByteTrack tracker with camera motion compensation, ready-made ONNX / TensorRT weights.
 
 ### Installation
 
@@ -10,13 +11,59 @@ conda activate DEIM
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 pip install opencv-python PyYAML scipy tqdm
 pip install safetensors     # official Hugging Face weights
-pip install onnx tensorrt   # only for --export
+pip install onnxruntime-gpu # *.onnx inference (or onnxruntime for CPU)
+pip install onnx tensorrt   # --export and *.engine inference
 ```
 
 ### Quick start
 
-* Download official COCO weights from the [Results](#results) table, save as `./weights/safetensors/deimv2_{model}.safetensors` (e.g. `deimv2_s.safetensors`)
-* Run `python main.py --model s --demo --weights weights/safetensors/deimv2_s.safetensors` (webcam, `q` to quit)
+```
+wget -P weights/safetensors https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_s.safetensors
+python main.py --model s --demo --track --weights weights/safetensors/deimv2_s.safetensors
+```
+
+Webcam, `q` to quit. `--source video.mp4` for a file, drop `--track` for detection only.
+
+### ONNX / TensorRT
+
+All weights are in [Releases](https://github.com/Shohruh72/DEIMv2-Track/releases/tag/v1.0):
+
+| File                         | Folder                 | Use                                                    |
+|:-----------------------------|:-----------------------|:-------------------------------------------------------|
+| `deimv2_{model}.safetensors` | `weights/safetensors/` | PyTorch, all 8 models                                  |
+| `deimv2_{model}.onnx`        | `weights/onnx/`        | onnxruntime, FP32, CPU or GPU (`atto`, `n`, `s`, `x`)  |
+| `deimv2_{model}_fp16.onnx`   | `weights/onnx/`        | source of a TensorRT FP16 engine for your GPU          |
+| `deimv2_{model}_fp16.engine` | `weights/engine/`      | prebuilt, runs only on RTX 4070 Laptop + TensorRT 11.4 |
+
+ONNX Runtime:
+
+```
+wget -P weights/onnx https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_s.onnx
+python main.py --model s --demo --track --weights weights/onnx/deimv2_s.onnx
+```
+
+TensorRT (engines are not portable, build once on your GPU):
+
+```
+wget -P weights/onnx https://github.com/Shohruh72/DEIMv2-Track/releases/download/v1.0/deimv2_s_fp16.onnx
+python main.py --model s --export engine --weights weights/onnx/deimv2_s_fp16.onnx
+python main.py --model s --demo --track --weights weights/engine/deimv2_s_fp16.engine
+```
+
+`--model` must match the file. Without this repo, only `numpy`, `opencv-python` and `onnxruntime` are needed:
+
+```python
+import cv2, numpy, onnxruntime
+
+size = 640  # atto: 320, femto: 416, others: 640
+session = onnxruntime.InferenceSession('deimv2_s.onnx')
+image = cv2.imread('image.jpg')
+h, w = image.shape[:2]
+x = cv2.resize(image, (size, size))[..., ::-1].transpose(2, 0, 1)[None].astype(numpy.float32) / 255
+outputs = session.run(None, {'images': x})[0][0]  # (300, 6): x1, y1, x2, y2, score, class
+outputs = outputs[outputs[:, 4] > 0.5]
+outputs[:, :4] *= [w / size, h / size, w / size, h / size]  # back to image pixels
+```
 
 ### Train
 
@@ -76,6 +123,7 @@ tracks = tracker.update(boxes, scores, classes, frame)  # (M, 7): x1, y1, x2, y2
 * Run `python main.py --model s --export` for ONNX (FP32, onnxruntime / CPU)
 * Run `python main.py --model s --export engine --batch-size 4` for TensorRT FP16 (max batch 4)
 * Add `--weights weights/safetensors/deimv2_s.safetensors` to export a given checkpoint, default `weights/pt/best.pt`
+* `--export engine --weights weights/onnx/deimv2_s_fp16.onnx` builds the engine directly from an exported ONNX
 * Input: `images` (N, 3, H, W) RGB in [0, 1], normalization is inside the model
 * Output: `outputs` (N, 300, 6) as `x1, y1, x2, y2, score, class` in input pixels, no NMS
 * TensorRT >= 10.6. An engine runs only on the GPU and TensorRT version that built it
